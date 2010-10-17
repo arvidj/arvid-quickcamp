@@ -1,0 +1,13 @@
+{
+   "content_scripts": [ {
+      "exclude_globs": [  ],
+      "include_globs": [ "http*://*.projectpath.com/*", "http*://*.updatelog.com/*", "http*://*.clientsection.com/*", "http*://*.seework.com/*", "http*://*.grouphub.com/*" ],
+      "js": [ "script.js" ],
+      "matches": [ "http://*/*", "https://*/*" ]
+   } ],
+   "converted_from_user_script": true,
+   "description": "Organize you projects, Quick!",
+   "key": "k4RsD168HbrIufUI/SPrCa66K29rzVJ5I9YVVnaD0j8=",
+   "name": "Quickcamp",
+   "version": "1.0"
+}
