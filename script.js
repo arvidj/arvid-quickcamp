@@ -16,55 +16,55 @@
 
 	var d1=ebi("Tabs");
 	var d2=ebi("Header");
-	var link=new Array();
-	links={
+
+	var links = {
 		79:{
-			pObj:lookForTab(d1,"Overview","O"),
+			pObj: lookForTab(d1,"Overview","O"),
 		},
 		84:{
-			pObj:lookForTab(d1,"To-Do","T")||lookForTab(d1,"To-Dos","T"),
+			pObj: lookForTab(d1,"To-Do","T") || lookForTab(d1,"To-Dos","T"),
 		},
 		73:{
-			pObj:lookForTab(d1,"Milestones","i"),
+			pObj: lookForTab(d1,"Milestones","i"),
 		},
 		77:{
-			pObj:lookForTab(d1,"Messages","M"),
+			pObj: lookForTab(d1,"Messages","M"),
 		},
 		87:{
-			pObj:lookForTab(d1,"Writeboards","W"),
+			pObj: lookForTab(d1,"Writeboards","W"),
 		},
 		80:{
-			pObj:lookForTab(d1,"People","P"),
+			pObj: lookForTab(d1,"People","P"),
 		},
 		65:{
-			pObj:lookForTab(d1,"Account","A"),
+			pObj: lookForTab(d1,"Account","A"),
 		},
 		70:{
-			pObj:lookForTab(d1,"Files","F"),
+			pObj: lookForTab(d1,"Files","F"),
 		},
 		69:{
-			pObj:lookForTab(d1,"Time","e"),
+			pObj: lookForTab(d1,"Time","e"),
 		},
 		76:{
-			pObj:lookForTab(d1,"Templates","l"),
+			pObj: lookForTab(d1,"Templates","l"),
 		},
 		83:{
-			pObj:lookForTab(d1,"Search","S"),
+			pObj: lookForTab(d1,"Search","S"),
 		},
 		68:{
-			pObj:lookForTab(d1,"Dashboard","D")||lookForLink(d2,"Dashboard","D"),
+			pObj: lookForTab(d1,"Dashboard","D")||lookForLink(d2,"Dashboard","D"),
 		},
 		71:{
-			pObj:lookForTab(d1,"Settings","g")||lookForLink(d2,"Settings","g"),
+			pObj: lookForTab(d1,"Settings","g")||lookForLink(d2,"Settings","g"),
 		},
 		78:{
-			pObj:lookForLink(d2,"Permissions","n"),
+			pObj: lookForLink(d2,"Permissions","n"),
 		},
 		72:{
-			pObj:lookForLink(d2,"Help","H"),
+			pObj: lookForLink(d2,"Help","H"),
 		},
 		67:{
-			pObj:lookForLink(d2,"Choose a project","C"),
+			pObj: lookForLink(d2,"Choose a project","C"),
 		}
 	};
 
@@ -102,30 +102,37 @@
 function ebi(pId){
 	return document.getElementById(pId);
 }
+
 function ebtn(pObj,pTag){
 	return pObj.getElementsByTagName(pTag);
 }
+
 function underline(pObj,pUnderline) {
 	var lText=pObj.innerHTML;
 	var n=lText.indexOf(pUnderline);
 	lNewText=lText.substring(0,n)+'<span style="text-decoration:underline!important">'+lText.substring(n,n+1)+'</span>'+lText.substring(n+1);
 	pObj.innerHTML=lNewText;
 }
+
 function getLink(pObj){
 	return pObj.href;
 }
+
 function mark(pObj,pUnderline) {
 	var lText=pObj.innerHTML;
 	var n=lText.indexOf(pUnderline);
 	lNewText=lText.substring(0,n)+'<span style="background:#04143F!important;text-decoration:underline;">'+lText.substring(n,n+1)+'</span>'+lText.substring(n+1);
 	pObj.innerHTML=lNewText;
 }
+
 function getLink(pObj){
 	return pObj.href;
 }
+
 function nounderline(pObj){
 	pObj.style.textDecoration="none";
 }
+
 function getElementsByAttribute(pObj,pAttr,pValue,pArr) {
 	if (!pArr) {
 		var pArr=new Array();
@@ -152,6 +159,7 @@ function getElementsByAttribute(pObj,pAttr,pValue,pArr) {
 	}
 	return pArr;
 }
+
 function lookForTab(pObj,pStr,pShortcut){
 	var lItems=getElementsByAttribute(pObj,"innerHTML",pStr);
 	if (lItems.length>0) {
@@ -161,6 +169,7 @@ function lookForTab(pObj,pStr,pShortcut){
 		return false;
 	}
 }
+
 function lookForLink(pObj,pStr,pShortcut){
 	var lItems=getElementsByAttribute(pObj,"innerHTML",pStr);
 	if (lItems.length>0) {
