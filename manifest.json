@@ -9,7 +9,8 @@
 			"http*://*.grouphub.com/*",
 			"http*://*.basecamphq.com/*"
 		],
-		"js": ["script.js"],
+		"js": ["jquery-1.4.3.min.js", "script.js"],
+		"css": ["quickcamp.css"],
 		"matches": ["http://*/*", "https://*/*"]
 	}],
 	"converted_from_user_script": true,
