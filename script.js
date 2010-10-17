@@ -9,7 +9,196 @@
 // @include       http*://*.grouphub.com/*
 // ==/UserScript==
 
-(function() {
+$ = jQuery;
+
+// Bindings for modes like "TODOs" etc
+function CampMode() {}
+CampMode.prototype = {
+	init: function () {},
+	initBindings: function () {
+		$(window).keydown(
+			jQuery.proxy(this.handleKeyPress, this)
+		);
+	},
+
+	shouldBeActive: function () {
+		return false;
+	},
+
+	handleKeyPress: function (event) {
+		// Iterate over keybindings, find matching and execute it.
+		var that = this;
+		$.each(this.keyBindings, function (key, func) {
+			eventIsKey(key, event) && func.call(that);
+		});
+	}
+};
+
+// Emacs like (kbd )-macro
+function eventIsKey(key, event) {
+	var ctrl = false, meta = false, upper = false;
+	var keySplitted = key.split("-");
+
+	while (keySplitted.length > 1) {
+		ctrl |= (keySplitted[0] == 'M');
+		meta |= (keySplitted[0] == 'M');
+		keySplitted.shift();
+	}
+	upper = !!keySplitted[0].match(/[A-Z]/);
+	key = keySplitted[0];
+
+	return (ctrl == event.ctrlKey)
+		&& (meta == event.altKey)
+		&& (upper == event.shiftKey)
+		&& (key.toUpperCase() == String.fromCharCode(event.keyCode));
+}
+
+function scrollTo(node) {
+	var top = $(node).offset().top, height = $(node).outerHeight();
+	var body = $('body');
+	var scrollTop = body[0].scrollTop;
+	var windowHeight = window.innerHeight;
+
+	if (top < scrollTop) {
+		body[0].scrollTop = top - 100;
+	} else if (top + height > scrollTop + windowHeight) {
+		body[0].scrollTop = top + height - windowHeight + 100;
+	}
+}
+
+// A kind of static method.
+CampMode.tabUrlMatch = function (tabUrl) {
+	return function () {
+		var splitted = document.location.pathname.split("/");
+		return splitted.length >= 4 && splitted[3].match(tabUrl);
+	}
+};
+
+
+TodoLists.prototype = new CampMode();
+TodoLists.prototype.constructor = TodoLists;
+function TodoLists(test) { this.asdf = test; }
+TodoLists.prototype.shouldBeActive = CampMode.tabUrlMatch(new RegExp('^todo_lists$'));
+TodoLists.prototype.init = function () {
+	this.findLists();
+	this.keyBindings = {
+		'j': this.nextTodo,
+		'k': this.prevTodo,
+		'n': this.nextList,
+		'p': this.prevList,
+		'e': this.editTodo,
+		'd': this.removeTodo,
+		'm': this.messageTodo,
+		'M-j': this.moveTodoDown,
+		'M-k': this.moveTodoUp
+	};
+	this.activeTodo = 0;
+	this.initBindings();
+};
+
+TodoLists.prototype.findLists = function () {
+	this.lists = $('.widget_content.list').map(function () {
+		var titleNode = $(this).find('.list_title');
+		return {
+			todos: $(this).find('.list_widget[id^=item_]'),
+			title: titleNode.find('span a').text(),
+			node: titleNode
+		};
+	});
+};
+
+TodoLists.prototype.nextTodo = function () {
+	/**
+	 *
+	 * If there is an selected todo is visible:
+	 *   jump to next, make sure it is also visible.
+	 * Else
+	 *   go to the first one that is (partially?) visible?
+	 *
+	 */
+	if (this.selectedTodo) {
+		this.unmarkAsSelected(this.selectedTodo);
+	}
+
+	if (this.selectedTodo && this.isInView(this.selectedTodo)) {
+		this.selectedTodo = this.findNextTodo();
+	} else {
+		this.selectedTodo = this.findFirstVisibleTodo();
+	}
+
+	scrollTo(this.selectedTodo);
+	this.markAsSelected(this.selectedTodo);
+};
+
+TodoLists.prototype.prevTodo = function () { console.log('stub'); };
+TodoLists.prototype.nextList = function () { console.log('stub'); };
+TodoLists.prototype.prevList = function () { console.log('stub'); };
+TodoLists.prototype.editTodo = function () { console.log('stub'); };
+TodoLists.prototype.removeTodo = function () { console.log('stub'); };
+TodoLists.prototype.messageTodo = function () { console.log('stub'); };
+TodoLists.prototype.moveTodoDown = function () { console.log('stub'); };
+TodoLists.prototype.moveTodoUp = function () { console.log('stub'); };
+
+TodoLists.prototype.findFirstVisibleTodo = function () {
+	var that = this, firstVisible;
+	this.eachTodo(function (todo) {
+		if (that.isInView(todo)) {
+			firstVisible = todo;
+			return false;
+		}
+	});
+	return firstVisible;
+};
+
+TodoLists.prototype.findNextTodo = function () {
+	var that = this, takeNext = false, next = false;
+	this.eachTodo(function (todo) {
+		if (todo == that.selectedTodo) {
+			takeNext = true;
+		} else if (takeNext) {
+			next = todo;
+			return false;
+		}
+	});
+	return next;
+}
+
+// TodoLists.prototype.allTodos = function () {
+// 	var res = [];
+// 	this.eachTodo(function (todo) {
+// 		res.push(todo);
+// 	});
+// 	return res;
+// };
+
+TodoLists.prototype.eachTodo = function (iterator) {
+	var ret;
+	this.lists.each(function () {
+		var list = this;
+		this.todos.each(function () {
+			ret = iterator(this, list);
+			if (ret === false) return false;
+		});
+		if (ret === false) return false;
+	});
+};
+
+TodoLists.prototype.markAsSelected = function (node) {
+	$(node).addClass('arvid-quickcamp-selected');
+};
+
+TodoLists.prototype.unmarkAsSelected = function (node) {
+	$(node).removeClass('arvid-quickcamp-selected');
+};
+
+TodoLists.prototype.isInView = function (node) {
+	var offs = $(node).offset();
+	var height = $(node).height();
+	return offs.top >= window.scrollY
+		&& offs.top + height <= window.scrollY + window.innerWidth;
+};
+
+(function($) {
 	// Constants
 	var glIsMain=false;
 	window.addEventListener('keydown', keyHandler, false);
@@ -68,12 +257,17 @@
 		}
 	};
 
+	// Init each mode that should be active.
+	var modes = [ new TodoLists() ];
+	$(modes).each(function () {
+		this.shouldBeActive() && this.init();
+	});
+
 	function keyHandler(event) {
-		
 		if ( event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
 			return false;
 		}
-		
+
 		if (event.target && event.target.nodeName) {
 			var targetNodeName = event.target.nodeName.toLowerCase();
 			if (targetNodeName == "select" || targetNodeName == "textarea" ||
@@ -96,8 +290,7 @@
 		return false;
 	}
 
-})();
-
+})(jQuery);
 
 function ebi(pId){
 	return document.getElementById(pId);
